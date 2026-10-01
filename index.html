@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Camera">
+<meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+<title>Creepy Photo Booth</title>
+</head>
+<body>
+<div id="app">
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <button id="flashBtn" class="icon-btn" aria-label="Flash">
+      <svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+      <span class="slash"></span>
+    </button>
+    <button id="chevronBtn" class="icon-btn chevron" aria-label="Options">
+      <svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button id="timerBtn" class="icon-btn" aria-label="Timer">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 9v4l2.5 2M9 2h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span id="timerLabel"></span>
+    </button>
+  </header>
+
+  <!-- VIEWFINDER -->
+  <main id="stage">
+    <div id="viewfinder">
+      <video id="video" playsinline autoplay muted></video>
+      <div id="grid" hidden><i></i><i></i><i></i><i></i></div>
+      <div id="focus"></div>
+      <div id="countdown"></div>
+      <div id="blink"></div>
+      <div id="camError" hidden>
+        <p>Camera access is needed.</p>
+        <button id="retryCam">Enable Camera</button>
+        <small>If nothing happens: Settings › Safari › Camera › Allow</small>
+      </div>
+      <div id="zoomPill"><button data-z="1" class="on">1×</button><button data-z="2">2</button></div>
+    </div>
+  </main>
+
+  <!-- MODES -->
+  <nav id="modes"><div id="modeTrack">
+    <span data-mode="square">SQUARE</span><span data-mode="photo" class="active">PHOTO</span><span data-mode="library">LIBRARY</span>
+  </div></nav>
+
+  <!-- BOTTOM CONTROLS -->
+  <footer id="controls">
+    <button id="thumb" aria-label="Last photo"><img id="thumbImg" alt=""></button>
+    <button id="shutter" aria-label="Take photo"><span></span></button>
+    <button id="flip" aria-label="Switch camera">
+      <svg viewBox="0 0 24 24"><path d="M20 8h-3l-2-3H9L7 8H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 13a3.5 3.5 0 0 1 6-2.4M15.5 13a3.5 3.5 0 0 1-6 2.4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="m14.8 9.2-.2 1.6 1.6.1M9.2 16.8l.2-1.6-1.6-.1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </footer>
+
+  <input type="file" id="fileInput" accept="image/*" hidden>
+  <div id="screenFlash"></div>
+  <div id="busy" hidden><div class="spinner"></div></div>
+
+  <!-- OPTIONS SHEET (the secret control room) -->
+  <section id="sheet" aria-hidden="true">
+    <div class="grab"></div>
+    <h2>Options</h2>
+    <div class="row"><label>Haunting</label><button class="toggle" data-key="haunt"></button></div>
+    <p class="hint">Off = a perfectly normal, innocent camera. 😇</p>
+
+    <h3>Entity</h3>
+    <div class="chips" id="entityChips">
+      <button data-v="random">🎲 Random</button>
+      <button data-v="tall">The Tall Man</button>
+      <button data-v="hooded">The Hooded One</button>
+      <button data-v="child">The Girl</button>
+      <button data-v="peeker">The Peeker</button>
+      <button data-v="hands">The Hands</button>
+      <button data-v="watcher">The Watcher</button>
+      <button data-v="shadow">Wall Shadow</button>
+    </div>
+
+    <h3>Intensity</h3>
+    <div class="seg" id="intensitySeg">
+      <button data-v="subtle">Subtle</button><button data-v="noticeable">Noticeable</button><button data-v="obvious">Obvious</button>
+    </div>
+
+    <h3>Frequency</h3>
+    <div class="seg" id="freqSeg">
+      <button data-v="1">Every Photo</button><button data-v="0.5">Sometimes</button><button data-v="0.2">Rarely</button>
+    </div>
+
+    <div class="row"><label>Delayed Reveal</label><button class="toggle" data-key="reveal"></button></div>
+    <p class="hint">Photos look normal at first… then it fades in.</p>
+    <div class="row"><label>Reveal Sound</label><button class="toggle" data-key="sound"></button></div>
+    <div class="row"><label>Shutter Sound</label><button class="toggle" data-key="shutter"></button></div>
+    <div class="row"><label>Grid</label><button class="toggle" data-key="grid"></button></div>
+
+    <button class="wide" id="importBtn">Haunt a Photo from Library</button>
+    <button class="wide danger" id="clearBtn">Delete All Photos</button>
+    <p class="hint center">Creepy Photo Booth · works offline</p>
+  </section>
+  <div id="scrim"></div>
+
+  <!-- PHOTO VIEWER -->
+  <section id="viewer" hidden>
+    <header class="vbar">
+      <button id="vDone">Done</button>
+      <div class="vtitle"><b id="vDate"></b><small id="vTime"></small></div>
+      <span class="vcount" id="vCount"></span>
+    </header>
+    <div id="vStage">
+      <img id="vClean" alt=""><img id="vHaunt" alt="">
+    </div>
+    <footer class="vtools">
+      <button id="vShare" aria-label="Save or Share"><svg viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1h-2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      <button id="vReroll" aria-label="Summon another"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 9M20 4v5h-5M20 12a8 8 0 0 1-13.7 5.6L4 15M4 20v-5h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button id="vClean2" aria-label="Show original"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
+      <button id="vDelete" aria-label="Delete"><svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </footer>
+    <div id="toast"></div>
+  </section>
+
+</div>
+<script src="haunt.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
